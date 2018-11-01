@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.songm.yix.dao.impl.GuaDaoImpl">
+    <resultMap id="BaseResultMap" type="cn.songm.yix.entity.Gua">
+        <id column="gua_id" property="guaId" jdbcType="VARCHAR" />
+        <result column="version" property="version" jdbcType="INTEGER" />
+        <result column="created" property="created" jdbcType="TIMESTAMP" />
+        <result column="updated" property="updated" jdbcType="TIMESTAMP" />
+        <result column="remark" property="remark" jdbcType="VARCHAR" />
+        <result column="gua_name" property="guaName" jdbcType="VARCHAR" />
+        <result column="guaci" property="guaci" jdbcType="VARCHAR" />
+        <result column="tuan" property="tuan" jdbcType="VARCHAR" />
+        <result column="xiang" property="xiang" jdbcType="VARCHAR" />
+        <result column="gindex" property="gindex" jdbcType="INTEGER" />
+        <result column="sguai" property="sguai" jdbcType="INTEGER" />
+        <result column="xguai" property="xguai" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="table_name"> yix_gua </sql>
+
+    <sql id="Base_Column_List">
+        version, created, updated, remark, gua_id, gua_name, guaci, tuan, xiang, gindex, sguai, xguai
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap"
+        parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List" />
+        from
+        <include refid="table_name" />
+        where gua_id = #{id, jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete from
+        <include refid="table_name" />
+        where gua_id = #{id, jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="insert" parameterType="cn.songm.yix.entity.Gua">
+        insert into
+        <include refid="table_name" />
+       (<include refid="Base_Column_List" />)
+        values
+       (#{version, jdbcType=INTEGER},
+        #{created, jdbcType=TIMESTAMP},
+        #{updated, jdbcType=TIMESTAMP},
+        #{remark, jdbcType=VARCHAR},
+        #{guaId, jdbcType=VARCHAR},
+        #{guaName, jdbcType=VARCHAR},
+        #{guaci, jdbcType=VARCHAR},
+        #{tuan, jdbcType=VARCHAR},
+        #{xiang, jdbcType=VARCHAR},
+        #{gindex, jdbcType=INTEGER},
+        #{sguai, jdbcType=INTEGER},
+        #{xguai, jdbcType=INTEGER})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="cn.songm.yix.entity.Gua">
+        update
+        <include refid="table_name" />
+        set updated = #{updated,jdbcType=TIMESTAMP}, version = version + 1
+        <if test="remark != null">, remark = #{remark, jdbcType=VARCHAR}</if>
+        <if test="guaName != null">, gua_name = #{guaName, jdbcType=VARCHAR}</if>
+        <if test="guaci != null">, guaci = #{guaci, jdbcType=VARCHAR}</if>
+        <if test="tuan != null">, tuan = #{tuan, jdbcType=VARCHAR}</if>
+        <if test="xiang != null">, xiang = #{xiang, jdbcType=VARCHAR}</if>
+        where gua_id = #{guaId, jdbcType=VARCHAR}
+    </update>
+    
+    <!-- 根据搜索条件获取数据 -->
+    <sql id="condition_sql">
+        <!-- Equal query -->
+        <if
+            test="beginDate != null and endDate != null and endDate !='' and beginDate != ''">
+            and created between #{beginDate} and CONCAT(#{endDate},'23:59:59')
+        </if>
+        <if test="guaId != null and guaId !=''"> and gua_id = #{guaId,jdbcType=VARCHAR}</if>
+        <if test="sguai != null"> and sguai = #{sguai,jdbcType=INTEGER}</if>
+        <if test="xguai != null"> and xguai = #{xguai,jdbcType=INTEGER}</if>
+        <!-- 是否行锁，要放在查询条件最后 -->
+        <if test="isPessimist != null and isPessimist == true "> for update</if>
+    </sql>
+
+    <select id="listBy" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from
+        <include refid="table_name" />
+        <where>
+            <include refid="condition_sql" />
+        </where>
+        order by created desc
+    </select>
+    
+    <select id="listByColumn" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from
+        <include refid="table_name" />
+        <where>
+            <include refid="condition_sql" />
+        </where>
+        order by created desc
+    </select>
+    
+    <select id="countByColumn" parameterType="java.util.Map" resultType="java.lang.Long">
+        select count(1) from
+        <include refid="table_name" />
+        <where>
+            <include refid="condition_sql" />
+        </where>
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="listPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from
+        <include refid="table_name" />
+        <where>
+            <include refid="condition_sql" />
+        </where>
+        order by created desc limit #{pageFirst}, #{pageSize}
+    </select>
+
+    <!-- 分页查询时要用到的总数统计 -->
+    <select id="listPageCount" parameterType="java.util.Map"
+        resultType="java.lang.Long">
+        select count(1) from
+        <include refid="table_name" />
+        <where>
+            <include refid="condition_sql" />
+        </where>
+    </select>
+
+</mapper>
